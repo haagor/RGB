@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/haagor/RGB/domains/eventing/model"
+	"github.com/haagor/RGB/domains/eventing/pkg/model"
 )
 
 type InMemoryEventStore struct {
