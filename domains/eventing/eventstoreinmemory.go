@@ -1,11 +1,11 @@
-package eventstoreinmemory
+package eventing
 
 import (
 	"log"
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/la-clinique-e-sante/monorepo/back/domains/eventsourcing/pkg/model"
+	"github.com/haagor/RGB/domains/eventing/model"
 )
 
 type InMemoryEventStore struct {
