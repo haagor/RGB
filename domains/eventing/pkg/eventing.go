@@ -3,7 +3,6 @@ package eventing
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/haagor/RGB/domains/eventing/pkg/cache"
@@ -16,11 +15,6 @@ type Source struct {
 	model.EventStorer
 	Locker
 	Cache
-	Scheduler
-}
-
-type Scheduler interface {
-	Schedule(time.Time, func() error)
 }
 
 type Cache interface {
@@ -64,52 +58,6 @@ func (u *Source) Load(aggregate model.Aggregate) error {
 	return nil
 }
 
-func (u *Source) LoadWithDelayedDispatch(aggregate model.Aggregate) error {
-	id := aggregate.ID()
-	events, err := u.Events(id, uuid.Nil)
-	if err != nil {
-		log.Printf("Error loading events for aggregate with id %s: %v\n", id, err)
-		return fmt.Errorf("unable to load aggregate with id: %s encountered error %w", id, err)
-	}
-
-	var newEventsToApply []model.Event
-	for _, l := range events {
-		newEvents, err := aggregate.Apply(l)
-		if err != nil {
-			return fmt.Errorf("apply for event: %s encountered: %w", l.GetEventID(), err)
-		}
-		newEventsToApply = append(newEventsToApply, newEvents...)
-		aggregate.SetLastAppliedEvent(l.GetEventID())
-	}
-	for _, e := range newEventsToApply {
-		dispatchAt := e.DispatchAt()
-		if dispatchAt.After(time.Now()) {
-			fmt.Println("in disptach in the future")
-			fmt.Println("eventID:", e.GetEventID())
-			// Schedule the event for future processing.
-			u.Schedule(dispatchAt, scheduleDispatchTask(u, aggregate, e))
-			continue // Move to the next event without attempting immediate dispatch.
-		}
-		// Attempt to dispatch the event immediately.
-		if err := u.Dispatch(aggregate, e); err != nil {
-			return fmt.Errorf("error in dispatch in LoadWithDelayedDispatch: %w", err)
-		}
-	}
-	if err := u.UpdateCache(aggregate); err != nil {
-		return err
-	}
-	return nil
-
-}
-
-func scheduleDispatchTask(s *Source, aggregate model.Aggregate, e model.Event) func() error {
-	fmt.Println("creating task")
-	return func() error {
-		fmt.Println("runnning task")
-		return s.Dispatch(aggregate, e)
-	}
-}
-
 // rebuildAggregate rebuilds the aggregate state by applying all events.
 func (u *Source) rebuildAggregate(aggregate model.Aggregate, eventLog []model.Event) error {
 	// The returned new event is ignored because it's already stored in the event store
@@ -148,15 +96,6 @@ func (u *Source) Dispatch(aggregate model.Aggregate, event model.Event) error {
 		event := eventsToProcess[0]
 		eventsToProcess = eventsToProcess[1:]
 
-		fmt.Println("in dispatch", event)
-		if event.DispatchAt().After(time.Now()) {
-			fmt.Println("scheduling in dispatch")
-			// Schedule the event for future processing and continue with the next iteration.
-			u.Schedule(event.DispatchAt(), scheduleDispatchTask(u, aggregate, event))
-			continue // Skip to the next event.
-		}
-
-		// Immediate processing of the event.
 		newEvents, err := aggregate.Apply(event)
 		if err != nil {
 			return fmt.Errorf("unable to apply event %T, with ID %s, encountered error %w", event, event.GetEventID(), err)
