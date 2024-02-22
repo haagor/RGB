@@ -12,6 +12,7 @@ import (
 
 type BaseEvent struct {
 	EventID uuid.UUID
+	PotID   uuid.UUID
 }
 
 func (e BaseEvent) GetEventID() uuid.UUID {
@@ -28,6 +29,8 @@ func NewBaseEvent() BaseEvent {
 func NewFromJson(eventType string, eventData []byte) (model.Event, error) {
 	var event model.Event
 	switch eventType {
+	case "PotCreated":
+		event = &PotCreated{}
 	case "PaintAddedToPot":
 		event = &PaintAddedToPot{}
 	default:
@@ -42,6 +45,8 @@ func NewFromJson(eventType string, eventData []byte) (model.Event, error) {
 
 func EventType(e model.Event) (string, error) {
 	switch e.(type) {
+	case *PotCreated:
+		return "PotCreated", nil
 	case *PaintAddedToPot:
 		return "PaintAddedToPot", nil
 	default:

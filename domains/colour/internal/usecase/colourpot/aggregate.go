@@ -39,6 +39,8 @@ func (cp *ColourPot) NewBaseEvent() events.BaseEvent {
 
 func (cp *ColourPot) Apply(pe eventmodel.Event) (newEvents []eventmodel.Event, err error) {
 	switch event := pe.(type) {
+	case *events.PotCreated:
+		return applyPotCreated(cp, event)
 	case *events.PaintAddedToPot:
 		return applyPaintAddedToPot(cp, event)
 	default:
