@@ -12,6 +12,34 @@ import (
 	eventing "github.com/haagor/RGB/domains/eventing/pkg"
 )
 
+func NewGetPotHandler(u *eventing.Source) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var requestBody struct {
+			PotID uuid.UUID
+		}
+
+		err := json.NewDecoder(req.Body).Decode(&requestBody)
+		if err != nil {
+			http.Error(w, "Failed to parse request body", http.StatusBadRequest)
+			return
+		}
+		potID := requestBody.PotID
+
+		cp, err := colourpot.NewDefault(potID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if cp.LastAppliedEvent() == uuid.Nil {
+			http.Error(w, "Pot not existed", http.StatusInternalServerError)
+			return
+		}
+
+		render.Render(w, req, cp)
+	}
+}
+
 func NewCreatePotHandler(u *eventing.Source) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var requestBody struct {
@@ -30,9 +58,14 @@ func NewCreatePotHandler(u *eventing.Source) http.HandlerFunc {
 		be := events.BaseEvent{EventID: uuid.New(), PotID: potID}
 		potCreatedEvent := events.NewPotCreated(be, volumeL)
 
-		cp, err := colourpot.NewDefault(uuid.New())
+		cp, err := colourpot.NewDefault(potID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if cp.LastAppliedEvent() != uuid.Nil {
+			http.Error(w, "Pot already existed", http.StatusInternalServerError)
 			return
 		}
 
