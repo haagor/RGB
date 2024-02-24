@@ -5,18 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/haagor/RGB/domains/colour/internal/model"
 	"github.com/haagor/RGB/domains/colour/internal/usecase/events"
 	eventing "github.com/haagor/RGB/domains/eventing/pkg"
 	eventmodel "github.com/haagor/RGB/domains/eventing/pkg/model"
-)
-
-var (
-	sessionMutexes map[string]*sync.Mutex
-	mutex          *sync.Mutex
 )
 
 type ColourPot struct {

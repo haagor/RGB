@@ -1,15 +1,20 @@
 package colourpot
 
 import (
+	"fmt"
+
 	"github.com/haagor/RGB/domains/colour/internal/model"
 	"github.com/haagor/RGB/domains/colour/internal/usecase/events"
 	eventmodel "github.com/haagor/RGB/domains/eventing/pkg/model"
 )
 
 func applyPaintAddedToPot(cp *ColourPot, e *events.PaintAddedToPot) ([]eventmodel.Event, error) {
-	colour := mixColors(cp.Colour, float64(cp.VolumeL), e.Colour, float64(e.VolumeL))
+	if cp.PaintVolumeL+e.VolumeL > cp.PotVolumeL {
+		return nil, fmt.Errorf("pot overflows")
+	}
+	colour := mixColors(cp.Colour, float64(cp.PaintVolumeL), e.Colour, float64(e.VolumeL))
 	cp.Colour = colour
-	cp.VolumeL = cp.VolumeL + e.VolumeL
+	cp.PaintVolumeL = cp.PaintVolumeL + e.VolumeL
 	return nil, nil
 }
 

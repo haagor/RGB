@@ -111,6 +111,11 @@ func NewAddColourHandler(u *eventing.Source) http.HandlerFunc {
 			return
 		}
 
+		if cp.LastAppliedEvent() == uuid.Nil {
+			http.Error(w, "Pot not existed", http.StatusInternalServerError)
+			return
+		}
+
 		err = u.Dispatch(cp, potCreatedEvent)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -7,6 +7,7 @@ import (
 
 func applyPotCreated(cp *ColourPot, e *events.PotCreated) ([]eventmodel.Event, error) {
 	cp.PotID = e.BaseEvent.PotID
-	cp.VolumeL = e.VolumeL
+	cp.PotVolumeL = e.VolumeL
+	cp.PaintVolumeL = 0
 	return nil, nil
 }

@@ -16,7 +16,7 @@ func New(s *eventing.Source) func(r chi.Router) {
 	return func(r chi.Router) {
 		r.Use()
 		r.Post("/create", NewCreatePotHandler(s))
-		r.Post("/addcolour", NewCreatePotHandler(s))
+		r.Post("/addcolour", NewAddColourHandler(s))
 		r.Get("/", NewGetPotHandler(s))
 	}
 }
