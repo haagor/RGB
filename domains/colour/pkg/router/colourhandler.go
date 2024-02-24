@@ -44,7 +44,7 @@ func NewCreatePotHandler(u *eventing.Source) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var requestBody struct {
 			PotID   uuid.UUID
-			VolumeL int
+			VolumeL float64
 		}
 
 		err := json.NewDecoder(req.Body).Decode(&requestBody)
@@ -83,10 +83,10 @@ func NewAddColourHandler(u *eventing.Source) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var requestBody struct {
 			PotID   uuid.UUID
-			VolumeL int
-			Red     int
-			Green   int
-			Blue    int
+			VolumeL float64
+			Red     float64
+			Green   float64
+			Blue    float64
 		}
 
 		err := json.NewDecoder(req.Body).Decode(&requestBody)

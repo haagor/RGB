@@ -1,7 +1,7 @@
 package model
 
 type Colour struct {
-	Red   int
-	Green int
-	Blue  int
+	Red   float64
+	Green float64
+	Blue  float64
 }

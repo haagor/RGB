@@ -2,10 +2,10 @@ package events
 
 type PotCreated struct {
 	BaseEvent
-	VolumeL int
+	VolumeL float64
 }
 
-func NewPotCreated(baseEvent BaseEvent, volume int) *PotCreated {
+func NewPotCreated(baseEvent BaseEvent, volume float64) *PotCreated {
 	return &PotCreated{
 		BaseEvent: baseEvent,
 		VolumeL:   volume,
